@@ -1,0 +1,5 @@
+{
+  "POTIONORGANIZER.mod_title": "Potion Organizer",
+  "POTIONORGANIZER-DRAG_THRESHOLD.title": "Drag Threshold",
+  "POTIONORGANIZER-DRAG_THRESHOLD.hover.desc": "Increase this if you are accidentally moving your potions when you mean to use them"
+}
