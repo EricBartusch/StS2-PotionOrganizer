@@ -5,6 +5,7 @@ using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Nodes.Potions;
 using MegaCrit.Sts2.Core.Random;
+using PotionOrganizer.PotionOrganizerCode.Networking;
 using PotionOrganizer.PotionOrganizerCode.Patches;
 
 namespace PotionOrganizer.PotionOrganizerCode;
@@ -61,6 +62,7 @@ public static class PotionReorderer
     {
         NDebugAudioManager.Instance?.Play(Rng.Chaotic.NextItem(TmpSfx.PotionSlosh), 0.5f, PitchVariance.Large);
         AnimatePotionsMoving(false);
+        PotionReorderHandler.SendReorder(DragManager.Player);
     }
 
     private static void AnimatePotionsMoving(bool skipPotionBeingDragged)
