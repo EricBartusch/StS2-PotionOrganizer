@@ -3,9 +3,9 @@
   "name": "PotionOrganizer",
   "author": "EricB",
   "description": "A Slay the Spire 2 mod that lets you reorder potions by dragging them.",
-  "version": "v1.0.0",
+  "version": "v1.1.0",
   "has_pck": true,
   "has_dll": true,
   "dependencies": [{"id": "BaseLib", "min_version": "3.3.0"}],
-  "affects_gameplay": false
+  "affects_gameplay": true
 }
