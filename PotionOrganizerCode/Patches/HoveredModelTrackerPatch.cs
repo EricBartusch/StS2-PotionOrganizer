@@ -1,3 +1,4 @@
+using System;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Models;
@@ -21,44 +22,25 @@ public static class HoveredModelTrackerPatch
     private static readonly AccessTools.FieldRef<HoveredModelTracker, Action<ulong>?> _hoverChangedRef =
         AccessTools.FieldRefAccess<HoveredModelTracker, Action<ulong>?>("HoverChanged");
     
-    [HarmonyPrefix]
-    public static bool Prefix(HoveredModelTracker __instance, ulong playerId)
+    [HarmonyPostfix]
+    public static void Postfix(HoveredModelTracker __instance, ulong playerId)
     {
-        var hoveredModels = _hoveredModelsRef(__instance);
         var playerCollection = _playerCollectionRef(__instance);
         var inputSynchronizer = _inputSynchronizerRef(__instance);
 
+        HoveredModelData data = inputSynchronizer.GetHoveredModelData(playerId);
+        if (data.type != HoveredModelType.Potion || data.hoveredModelId == null) return;
+
         Player player = playerCollection.GetPlayer(playerId);
         int playerSlotIndex = playerCollection.GetPlayerSlotIndex(player);
-        if (playerSlotIndex >= hoveredModels.Count)
-            return false;
 
-        HoveredModelData data = inputSynchronizer.GetHoveredModelData(playerId);
-        AbstractModel? abstractModel = data.type switch
-        {
-            HoveredModelType.None => null,
-            HoveredModelType.Card => data.hoveredCombatCard?.ToCardModelOrNull(),
-            HoveredModelType.Relic => (data.hoveredRelicIndex < player.Relics.Count && data.hoveredRelicIndex >= 0)
-                ? player.Relics[data.hoveredRelicIndex!.Value]
-                : null,
-            HoveredModelType.Potion => data.hoveredModelId != null
-                ? player.PotionSlots.FirstOrDefault(p => p?.Id == data.hoveredModelId)
-                : null,
-            _ => throw new InvalidOperationException($"Unsupported hover type {data.type}"),
-        };
+        var hoveredModels = _hoveredModelsRef(__instance);
 
-        if (abstractModel == null && data.type is not HoveredModelType.None and not HoveredModelType.Potion)
-            abstractModel = data.hoveredModelId != null
-                ? ModelDb.GetByIdOrNull<AbstractModel>(data.hoveredModelId)
-                : null;
+        // if both clients agree on what is being hovered bail out
+        if (hoveredModels[playerSlotIndex]?.Id == data.hoveredModelId) return;
 
-        AbstractModel? previous = hoveredModels[playerSlotIndex];
-        if (previous != abstractModel)
-        {
-            hoveredModels[playerSlotIndex] = abstractModel;
-            _hoverChangedRef(__instance)?.Invoke(playerId);
-        }
-
-        return false;
+        var correctPotion = player.PotionSlots.FirstOrDefault(p => p?.Id == data.hoveredModelId);
+        hoveredModels[playerSlotIndex] = correctPotion;
+        _hoverChangedRef(__instance)?.Invoke(playerId);
     }
 }

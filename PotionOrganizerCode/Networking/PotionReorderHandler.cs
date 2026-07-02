@@ -33,26 +33,26 @@ public static class PotionReorderHandler
     {
         if (player == null || _netService == null || !_netService.IsConnected) return;
 
-        var slots = _potionSlotsRef(player);
+        var potions = _potionSlotsRef(player);
         _netService.SendMessage(new PotionReorderMessage
         {
-            SlotIds = slots.Select(p => p?.Id).ToArray()
+            SlotIds = potions.Select(p => p?.Id).ToArray()
         });
     }
 
     private static void OnReorderReceived(PotionReorderMessage msg, ulong senderId)
     {
-        if (_playerCollection == null) return;
-
-        Player? player = _playerCollection.GetPlayer(senderId);
+        Player? player = _playerCollection?.GetPlayer(senderId);
         if (player == null) return;
 
-        var slots = _potionSlotsRef(player);
-        var snapshot = slots.ToList();
+        var potions = _potionSlotsRef(player);
+        var oldPotions = potions.ToList();
 
-        slots.Clear();
-        slots.AddRange(msg.SlotIds.Select(id => id != null
-            ? snapshot.FirstOrDefault(p => p?.Id == id)
+        potions.Clear();
+        // replace potions with the incoming ones
+        // if the potion isn't null, find it in the old list and place it in the new spot
+        potions.AddRange(msg.SlotIds.Select(id => id != null
+            ? oldPotions.FirstOrDefault(p => p?.Id == id)
             : null));
     }
 }

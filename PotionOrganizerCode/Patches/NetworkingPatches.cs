@@ -11,8 +11,7 @@ public static class NetworkingPatches
 {
     [HarmonyPatch(typeof(HoveredModelTracker), MethodType.Constructor, typeof(PeerInputSynchronizer), typeof(IPlayerCollection))]
     [HarmonyPostfix]
-    static void OnHoveredModelTrackerConstructed(PeerInputSynchronizer inputSynchronizer,
-        IPlayerCollection playerCollection)
+    static void OnHoveredModelTrackerConstructed(PeerInputSynchronizer inputSynchronizer, IPlayerCollection playerCollection)
     {
         PotionReorderHandler.Initialize(inputSynchronizer.NetService, playerCollection);
     }
